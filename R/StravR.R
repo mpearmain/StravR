@@ -1,4 +1,8 @@
 #' Creates a skeleton shell for accessing the Strava (V3) API.
+#' 
+#' In order to utilise this package a user must create a STRAVA api application
+# 'https://www.strava.com/settings/api
+#' 
 #' @export
 #' @import rjson RCurl
 #' @return
@@ -30,6 +34,9 @@ StravR <- function() {
     #'  
     #' This function gets the Client ID and Client Secret of the Application from
     #' the user and saves it locally to a file for OAuth 2.0 Authorization flow. 
+    #' 
+    #' One must create an app in Strava https://www.strava.com/settings/api
+    #' Recommended 
     #'  
     #' @export  
     #' @param client.id Client ID of the Application 
@@ -102,63 +109,18 @@ StravR <- function() {
         # Build the URL string
         client.id <- as.character(client.id) 
         client.secret <- as.character(client.secret)
-        redirect.uri <- 'http://localhost:8282/authorized'
+        redirect.uri <- 'http://localhost'
         
-	# If a user wants to change read / write access to the api, use the scope option below
+      	# If a user wants to change read / write access to the api, use the scope option below
         # for saftey, this is set to 'public' to give viewability of user data. 
-        url <- paste0('https://accounts.google.com/o/oauth2/auth?',
-                      'scope=public',
+        url <- paste0('https://www.strava.com/oauth/authorize?',
+                      'scope=public&',
                       'redirect_uri=', redirect.uri, '&',
                       'response_type=code&',
                       'client_id=', client.id, '&',
-                      'approval_prompt=force&')
+                      'approval_prompt=force')
         
-        # Get Auth Code
-        # Load the prepared URL into a WWW browser.
-        browseURL(url) 
-        cat("The Google Analytics data extraction process requires an authorization code.",
-            "To accept the authorization code, you need to follow certain steps in your ",
-            "browser. This code will help this R packge to generate the access",
-            "token. Make sure you have already supplied credentials for installed app.",
-            "\n\nSteps to be followed : \n1. Authorize your",
-            "Google Analytics account by providing email and password. \n ",
-            "\n2. Copy the generated code.")
-        
-        code <- readline(as.character(cat("\n\nPaste the authorization code here",
-                                          ":=>")))
-        
-        
-        cat("Retrieving the Access and Refresh Tokens based on the Authorization Code\n")
-        
-        # For retrieving the access token.
-        token.list <- fromJSON(postForm('https://www.strava.com/oauth/token',
-                                        code = code,
-                                        client_id = client.id, 
-                                        client_secret = client.secret,
-                                        redirect_uri = redirect.uri,
-                                        grant_type = "authorization_code",
-                                        style = "POST"))
-        
-        # For saving the generated access token (as List data type with 
-        # values - access_token, token_type, expires_in and refresh_token)
-        # in file system where StravR  package located.
-        
-        # token.list contains the response by the Google Analytics API
-        # Contents : access_token, token_type, refresh_token, expires_in
-        # Retained the same naming convention as that followed by the StravR API for 
-        # these objects
-        access.token <- token.list$access_token 
-        
-        save(token.list, file = file.path(path.package("StravR"), "accesstoken.rda"))
-        
-        access.token.file.path <- as.character(file.path(path.package("StravR"),
-                                                         "accesstoken.rda"))                 
-        
-        cat("Access token has been saved to",access.token.file.path,"\n")
-        
-        return(invisible())
-      }
-      
+    
     } else {
       # Load the Access Token from the file saved to the system
       
@@ -306,7 +268,8 @@ StravR <- function() {
   }
   ##############################################################################
   
-  return(list(ParseApiErrorMessage = ParseApiErrorMessage,
+  return(list(GetAppCredentials    = GetAppCredentials,
+              ParseApiErrorMessage = ParseApiErrorMessage,
               GenerateAccessToken  = GenerateAccessToken,
               RefreshToAccessToken = RefreshToAccessToken,
               RemoveToken          = RemoveToken,
