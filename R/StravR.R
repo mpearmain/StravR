@@ -1,7 +1,6 @@
 #' Creates a skeleton shell for accessing the Strava (V3) API.
 #' @export
-#' @import rjson
-#' @import RCurl
+#' @import rjson RCurl
 #' @return
 #'   Returns a list of methods, for accessing the Strava reporting API
 #'       GetAppCredentials()

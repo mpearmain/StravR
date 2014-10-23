@@ -12,6 +12,5 @@ License: newBSD
 ByteCompile: TRUE
 LazyLoad: TRUE
 Imports:
-    RCurl
-Depends:
-    R(>= 3.0.2)
+    RCurl,
+    rjson
