@@ -74,23 +74,16 @@ StravR <- function() {
     cat("Your App Credentials have been saved to", file.path, "\n")
     }
   
-  GenerateAccessToken <- function() {
-    #' Gets an OAuth 2.0 Access Token by authorizing the user account to the 
-    #' Strava API https://www.strava.com/oauth/authorize
+  SaveAccessToken <- function(access.token) {
+    #' Saves an OAuth 2.0 Access Token from a user enable Strava App 
     #' 
-    #' When evaluated for the first time this function asks for User Consent
-    #' for the Strava Account and retrieves the Access and Refresh Tokens
-    #' for Authorization. These tokens are saved locally to a file on the user's system.
-    #' If the user had authorized an account earlier and refresh token is already found
-    #' on the user's system, then this function retrives a new Access Token and updates
-    #' the Access Token File in user's memory.
+    #' When evaluated for the first time this function takes the access token and saves
+    #' them locally to a file on the user's system.
+    #' If the user had authorized an account earlier nothing happens.
     #'
     #' @export  
-    #' @param None
-    #' @examples
-    #' 
-    #' ga$GenerateAccessToken()
-    #' 
+    #' @param access_token the access token from strava for an enabled app
+    #'    https://www.strava.com/settings/api 
     #' @returns None. The Tokens are saved to a file on the user's system.
     #'   by default the location is where the package is installed.
     
@@ -102,24 +95,16 @@ StravR <- function() {
         stop(cat("Application Credentials do not exist.\nPlease use the GetAppCredentials 
                  function to save the credentials to a local file"))
       } else {
-        # API Credentials file exists  
-        # Load the app_credentials file
-        load(file.path(path.package("StravR"), "app_credentials.rda"))
+                
+        save(token.list, file = file.path(path.package("StravR"), "accesstoken.rda"))
         
-        # Build the URL string
-        client.id <- as.character(client.id) 
-        client.secret <- as.character(client.secret)
-        redirect.uri <- 'http://localhost'
+        access.token.file.path <- 
+          as.character(file.path(path.package("StravR"), "accesstoken.rda"))                 
         
-      	# If a user wants to change read / write access to the api, use the scope option below
-        # for saftey, this is set to 'public' to give viewability of user data. 
-        url <- paste0('https://www.strava.com/oauth/authorize?',
-                      'scope=public&',
-                      'redirect_uri=', redirect.uri, '&',
-                      'response_type=code&',
-                      'client_id=', client.id, '&',
-                      'approval_prompt=force')
+        cat("Access token has been saved to", access.token.file.path, "\n")
         
+        return(invisible())
+      }
     
     } else {
       # Load the Access Token from the file saved to the system
@@ -141,29 +126,7 @@ StravR <- function() {
       return(invisible())
     }
   }
-  
-  RefreshToAccessToken <- function(refresh.token, client.id, client.secret){
-    #' This function takes the Refresh Token as an argument and retrives a new 
-    #' Access Token based on it
-    #' Reference : https://developers.google.com/accounts/docs/OAuth2#installed
-    #' Args :
-    #'   refresh.token : Refresh Token that was saved to the local file
-    #'   client.id     : Client ID of the Application. This is a OAuth2.0 Credential
-    #'   client.secret : Client Secret of the Application. Again this too is an
-    #'                   OAuth2.0 Credential
-    #' Returns :
-    #'   Access Token  : New Access Token 
     
-    refresh.token.list = fromJSON(postForm('https://accounts.google.com/o/oauth2/token',
-                                           refresh_token = refresh.token,
-                                           client_id = client.id,
-                                           client_secret = client.secret,
-                                           grant_type = "refresh_token",
-                                           style = "POST" ))
-    
-    return(refresh.token.list$access_token)
-  }
-  
   RemoveToken <- function() {
     #' Deletes the stored Access and Refresh Tokens from the local file 
     #'
@@ -215,37 +178,6 @@ StravR <- function() {
     
   }
   
-  
-  ValidateToken <- function() {
-    #' This function checks whether the Access Token stored in the local file is 
-    #' expired. If yes, it generates a new Access Token and updates the local file.
-    #' If no, then it returns the stored Access Token
-    #' @keywords internal 
-    #' Args: 
-    #'    None 
-    #'  Returns: 
-    #'    None
-    #'    The old token is checked for expiry. If it is expired, a new access token is 
-    #'    generated and updated in the local file
-    
-    load(file.path(path.package("StravR"),
-                   "accesstoken.rda"))
-    
-    api.response.json <- getURL(paste0("https://www.googleapis.com/oauth2/v1/",
-                                       "tokeninfo?access_token=",
-                                       token.list$access_token
-    ))
-    api.response.list <- fromJSON(api.response.json, method = 'C')  
-    check.token.param <- regexpr("error", api.response.json)
-    
-    if (check.token.param[1] != -1) {
-      # If token has expired Generate a New Access token
-      cat("Access Token had expired. Regenerating access token\n") 
-      GenerateAccessToken()
-      return(invisible())
-    }    
-  }
-  
   ParseApiErrorMessage <- function(api.response.json) {
     #' To check whether the returned JSON response is error or not. 
     #' If it is error then it will  
@@ -270,9 +202,7 @@ StravR <- function() {
   
   return(list(GetAppCredentials    = GetAppCredentials,
               ParseApiErrorMessage = ParseApiErrorMessage,
-              GenerateAccessToken  = GenerateAccessToken,
-              RefreshToAccessToken = RefreshToAccessToken,
+              SaveAccessToken      = SaveAccessToken,
               RemoveToken          = RemoveToken,
-              ValidateToken        = ValidateToken, 
               RemoveAppCredentials = RemoveAppCredentials)) 
 }

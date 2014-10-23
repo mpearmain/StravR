@@ -15,7 +15,7 @@ Returns a list of methods, for accessing the Strava reporting API
       RefreshToAccessToken()
 }
 \description{
-Creates a skeleton shell for accessing the Strava (V3) API.
+In order to utilise this package a user must create a STRAVA api application
 }
 \examples{
 strava <- StravR()
