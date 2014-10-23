@@ -1,19 +1,18 @@
+#' Creates a skeleton shell for accessing the Strava (V3) API.
+#' @export
+#' @import rjson
+#' @import RCurl
+#' @return
+#'   Returns a list of methods, for accessing the Strava reporting API
+#'       GetAppCredentials()
+#'       RemoveToken()
+#'       RemoveAppCredentials()
+#'       ValidateToken()
+#'       GenerateAccessToken()
+#'       RefreshToAccessToken()
+#' @examples
+#' strava <- StravR()     
 StravR <- function() {
-  #' Creates a skeleton shell for accessing the Strava (V3) API.
-  #' @export
-  #' @import rjson
-  #' @import RCurl
-  #' @return
-  #'   Returns a list of methods, for accessing the Strava reporting API
-  #'       GetAppCredentials()
-  #'       RemoveToken()
-  #'       RemoveAppCredentials()
-  #'       ValidateToken()
-  #'       GenerateAccessToken()
-  #'       RefreshToAccessToken()
-  #' @examples
-  #' strava <- StravR()     
-  
   # We use oauth 2.0 API to authorize the user account 
   # and to get the access token to request to the Starva data API.
   
@@ -26,6 +25,7 @@ StravR <- function() {
                                                    package = "RCurl"),
                               ssl.verifypeer = FALSE))
   
+
   GetAppCredentials <- function(client.id, client.secret) {
     #' Save App Credentials (Client ID and Client Secret) locally to system
     #'  
@@ -39,8 +39,7 @@ StravR <- function() {
     #' @examples
     #' strava <- StravR()
     #' strava$GetAppCredentials('xxxxxxxxxxxx','xxxxxx-xxxxxxxxxxxxx')
-    #' Returns:
-    #'  Saves the App Credentials to a file on the user's system 
+    #' @return Saves the App Credentials to a file on the user's system     
     
     
     if(file.exists(file.path(system.file(package = "StravR"),
