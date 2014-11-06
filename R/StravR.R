@@ -50,8 +50,10 @@ StravR <- function() {
     
     if(file.exists(file.path(system.file(package = "StravR"),
                              "app_credentials.rda"))) {
-      stop(cat("Your Application Credentials are already saved to your system. 
-               Please use the RemoveAppCredentials Function to delete the credentials\n"))
+      cat("Your Application Credentials are already saved to your system.\n 
+           Please use the RemoveAppCredentials() Function to delete the\n
+           credentials\n")
+      return(invisible())
     }
     
     # Argument Validation
@@ -74,7 +76,7 @@ StravR <- function() {
     cat("Your App Credentials have been saved to", file.path, "\n")
     }
   
-  SaveAccessToken <- function(access.token) {
+  GetAccessToken <- function(access.token) {
     #' Saves an OAuth 2.0 Access Token from a user enable Strava App 
     #' 
     #' When evaluated for the first time this function takes the access token and saves
@@ -92,11 +94,12 @@ StravR <- function() {
       # File Does not exist
       # Check if API_Creds exists
       if(!file.exists(file.path(path.package("StravR"), "app_credentials.rda"))) {
-        stop(cat("Application Credentials do not exist.\nPlease use the GetAppCredentials 
-                 function to save the credentials to a local file"))
+        stop(cat("Application Credentials do not exist.\n
+                  Please use the GetAppCredentials 
+                  function to save the credentials to a local file"))
       } else {
                 
-        save(token.list, file = file.path(path.package("StravR"), "accesstoken.rda"))
+        save(access.token, file = file.path(path.package("StravR"), "accesstoken.rda"))
         
         access.token.file.path <- 
           as.character(file.path(path.package("StravR"), "accesstoken.rda"))                 
@@ -113,7 +116,9 @@ StravR <- function() {
       load(file.path(path.package("StravR"), "app_credentials.rda"))
       
       # Get new Access Token
-      access.token <- RefreshToAccessToken(token.list$refresh_token, client.id, client.secret)
+      access.token <- RefreshToAccessToken(access.token$refresh_token, 
+                                           client.id, 
+                                           client.secret)
       
       #In case if a New Access Token is generated update it in the file as well
       token.list$access_token <- access.token
@@ -177,7 +182,7 @@ StravR <- function() {
     }
     
   }
-  
+    
   ParseApiErrorMessage <- function(api.response.json) {
     #' To check whether the returned JSON response is error or not. 
     #' If it is error then it will  
@@ -202,7 +207,7 @@ StravR <- function() {
   
   return(list(GetAppCredentials    = GetAppCredentials,
               ParseApiErrorMessage = ParseApiErrorMessage,
-              SaveAccessToken      = SaveAccessToken,
+              GetAccessToken       = GetAccessToken,
               RemoveToken          = RemoveToken,
               RemoveAppCredentials = RemoveAppCredentials)) 
 }
